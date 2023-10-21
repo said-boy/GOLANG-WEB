@@ -2,4 +2,11 @@
 
 2. 
 
-3. handler digunakan untuk menangani request dari client
+3. handler 
+    - digunakan untuk menangani request dari client
+    - tetapi sayangnya handler ini hanya dapat menangani 1 request saja.
+
+4. serveMux 
+    - sama seperti handler, serverMux ini juga digunakan untuk menangani request dari client.
+    - bedanya serveMux dapat menangani banyak request url.
+    - dalam bahasa lain.. ini sama seperti router.

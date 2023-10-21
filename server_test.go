@@ -17,7 +17,7 @@ func TestServer(t *testing.T) {
 	}
 }
 
-// 3. handler
+// 3. handler (tidak mendukung multiple endpoint)
 func TestHandler(t *testing.T) {
 
 	var handler http.HandlerFunc = func(w http.ResponseWriter, r *http.Request) {
@@ -39,5 +39,49 @@ func TestHandler(t *testing.T) {
 		panic(err)
 	}
 
+}
+
+// 4. serveMux (support multiple endpoints)
+func TestServeMux(t *testing.T) {
+
+	mux := http.NewServeMux()
+
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprint(w, "Halaman >> /")
+	})
+
+	mux.HandleFunc("/hi", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprint(w, "Halaman >> /hi")
+	})
+
+	// jika menambahkan / diakhir maka param apapun dibelakangnya akan
+	// menggunakan handler ini. ex: /images/tidak-ada akan menggunakan handler ini
+	mux.HandleFunc("/images/", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprint(w, "Halaman >> /images/")
+	})
+
+	// tetapi jika param berikutnya terdaftar pada handler, maka handlernya
+	// akan digunakan. ex: /images/thumbnails/apapun akan menggunakan handler ini
+	mux.HandleFunc("/images/thumbnails/", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprint(w, "Halaman >> /images/thumbnails/")
+	})
+
+	// golang akan memprioritaskan url yang panjang terlebih daluhu.
+	
+	// maksudnya jika anda memasukkan url /images/thumbnails/ . kita tahu ada handler /images/
+	// tetapi /images/thumbnails/ akan mencari handler /images/thumbnails/ terlebih dahulu.
+	// jika /images/thumbnails/ ada maka akan digunakan jika tidak ada maka akan menggunakan
+	// handler /images/ 
+
+	server := http.Server{
+		Addr: "localhost:8080",
+		Handler: mux,
+	}
+
+	err := server.ListenAndServe()
+	if err != nil {
+		panic(err)
+	}
+	
 }
 
