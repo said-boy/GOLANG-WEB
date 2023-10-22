@@ -2,7 +2,9 @@ package golangweb
 
 import (
 	"fmt"
+	"io"
 	"net/http"
+	"net/http/httptest"
 	"testing"
 )
 
@@ -73,6 +75,8 @@ func TestServeMux(t *testing.T) {
 	// jika /images/thumbnails/ ada maka akan digunakan jika tidak ada maka akan menggunakan
 	// handler /images/ 
 
+	// lebih baik buat url se-unique mungkin. 
+
 	server := http.Server{
 		Addr: "localhost:8080",
 		Handler: mux,
@@ -83,5 +87,51 @@ func TestServeMux(t *testing.T) {
 		panic(err)
 	}
 	
+}
+
+// 5. Request
+func TestRequest(t *testing.T) {
+
+	var handler http.HandlerFunc = func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintln(w, r.Method) // "GET"
+		fmt.Fprintln(w, r.RequestURI) // "/"
+		fmt.Fprintln(w, r.URL.Query().Get("nama")) // "/?nama=said" -> "said"
+		fmt.Fprintln(w, r.Response) // <nil>
+	}
+
+	server := http.Server{
+		Addr: "localhost:8080",
+		Handler: handler,
+	} 
+
+	err := server.ListenAndServe()	
+	if err != nil {
+		panic(err)
+	}
+
+}
+
+// 6. Http test
+// Membuat implementasi seperti HandlerFunc
+func myHandlerFunc(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprint(w, "Hello World!")
+}
+
+func TestHttpTest(t *testing.T) {
+
+	// dengan menggunakan httptest kita tidak perlu lagi buka browser
+	// untuk mengetahui hasil testnya.
+	writter := httptest.NewRecorder()
+	request := httptest.NewRequest("GET", "http://localhost:8080/", nil)
+	myHandlerFunc(writter, request)
+
+	// Versi singkat
+	fmt.Println(writter.Body.String()) // "Hello World!"
+
+	// versi lengkap
+	response := writter.Result()
+	body, _ := io.ReadAll(response.Body)
+	fmt.Println(string(body)) // "Hello World!"
+
 }
 
