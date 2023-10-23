@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 )
 
@@ -158,4 +159,22 @@ func TestMultipleParameter(t *testing.T) {
 	
 }
 
+// 8. multiple values parameter
+func HandlerMultipleValues(w http.ResponseWriter, r *http.Request) {
+	query := r.URL.Query()
+	names := query["name"]
 
+	fmt.Fprint(w, strings.Join(names, " "))
+}
+
+func TestMultipleValues(t *testing.T) {
+	w := httptest.NewRecorder()
+	
+	// 1 parameter multi values dengan cara menggunakan key yang sama tetapi dengan value yang berbeda
+	// dan tetap dipisahkan dengan tanda '&' untuk setiap query
+	r := httptest.NewRequest("GET", "http://localhoat:8080/?name=muhammad&name=said&name=al&name=khudri", nil)
+
+	HandlerMultipleValues(w,r)
+
+	fmt.Println(w.Body.String())
+}
