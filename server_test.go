@@ -95,6 +95,8 @@ func TestRequest(t *testing.T) {
 	var handler http.HandlerFunc = func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintln(w, r.Method) // "GET"
 		fmt.Fprintln(w, r.RequestURI) // "/"
+
+		// cara mengambil parameter dari url.
 		fmt.Fprintln(w, r.URL.Query().Get("nama")) // "/?nama=said" -> "said"
 		fmt.Fprintln(w, r.Response) // <nil>
 	}
@@ -134,4 +136,26 @@ func TestHttpTest(t *testing.T) {
 	fmt.Println(string(body)) // "Hello World!"
 
 }
+
+// 7. mutliple parameter
+func multipleParameterHandler(w http.ResponseWriter, r *http.Request) {
+	nama := r.URL.Query().Get("nama")
+	bahasa := r.URL.Query().Get("bahasa")
+
+	// Fprintf -> print format 
+	// %s -> string
+	fmt.Fprintf(w, "Halo.. %s ", nama)
+	fmt.Fprintf(w, "Kamu sedang belajar bahasa %s yaa..?", bahasa)
+}
+
+func TestMultipleParameter(t *testing.T) {
+	w := httptest.NewRecorder()
+	// untuk multiple gunakan & antara 1 parameter dan yang lainnya.
+	r := httptest.NewRequest("GET", "http://localhost:8080/?nama=said&bahasa=golang", nil)
+	multipleParameterHandler(w, r)
+
+	fmt.Println(w.Body.String())
+	
+}
+
 
