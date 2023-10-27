@@ -178,3 +178,30 @@ func TestMultipleValues(t *testing.T) {
 
 	fmt.Println(w.Body.String())
 }
+
+// 9. Header 
+func HandlerHeaderResponse(w http.ResponseWriter, r *http.Request){
+	w.Header().Add("content-type", "application/json")
+	fmt.Fprint(w, r.Header.Get("content-type"))
+}
+
+func TestHeader(t *testing.T){
+	w := httptest.NewRecorder()
+	r := httptest.NewRequest(http.MethodGet, "http://localhost:8080/", nil)
+
+	HandlerHeaderResponse(w, r)
+	fmt.Println(w.Header().Get("content-type"))
+}
+
+func HandlerHeaderRequest(w http.ResponseWriter, r *http.Request){
+	fmt.Fprint(w, r.Header.Get("x-powered-by"))
+
+}
+
+func TestHeaderRequest(t *testing.T){
+	w := httptest.NewRecorder()
+	r := httptest.NewRequest(http.MethodGet, "http://localhost:8080/", nil)
+	r.Header.Add("x-powered-by", "Muhammad Said Alkhudri")
+	HandlerHeaderRequest(w, r)
+	fmt.Println(w.Body.String())
+}
