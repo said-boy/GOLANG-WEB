@@ -205,3 +205,75 @@ func TestHeaderRequest(t *testing.T){
 	HandlerHeaderRequest(w, r)
 	fmt.Println(w.Body.String())
 }
+
+func HandlerPostForm(w http.ResponseWriter, r *http.Request){
+	// saat mengambil request post, golang harus melakukan parsing
+	// sebelum diambil datanya.
+	// err := r.ParseForm()
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// f_name := r.PostForm.Get("first_name")
+	// l_name := r.PostForm.Get("last_name")
+
+	// tetapi anda dapat menggunakan postformvalue. ini sebenarnya
+	// sebuah `shortcut` dari kode parsing diatas. sebenarnya
+	// dibelakang layar yang dilakukan sama seperti diatas, yaitu 
+	// diparsing terlebih dahulu.
+	f_name := r.PostFormValue("first_name")
+	l_name := r.PostFormValue("last_name")
+
+	fmt.Fprintf(w, "Halo %s %s", f_name, l_name)
+}
+
+func TestPostForm(t *testing.T){
+	formPost := strings.NewReader("first_name=Muhammad Said&last_name=Alkhudri")
+	r := httptest.NewRequest(http.MethodPost, "http://localhost:8080/", formPost)
+	w := httptest.NewRecorder()
+	
+	// saat mengirimkan post wajib menambahkan ini pada header requestnya
+	// gunanya adalah untuk memberitahu server bahwa ini adalah data post
+	r.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+
+	HandlerPostForm(w, r)
+	fmt.Println(w.Body.String())
+}
+
+func HandlerResponseCode(w http.ResponseWriter, r *http.Request){
+	token := r.Header.Get("Token")
+	if token == "" {
+		// WriteHeader digunakan untuk menambahkan status code
+		w.WriteHeader(http.StatusUnauthorized)
+		fmt.Fprintln(w,"Silahkan login terlebih dahulu.")
+	} else {
+		// jika tidak ada WriteHeader maka default response nya 200 Ok
+		fmt.Fprintln(w,"Selamat datang.")
+	}
+}
+
+func TestResponseCodeInvalid(t *testing.T){
+	w := httptest.NewRecorder()
+	r := httptest.NewRequest("GET", "http://localhost:8080/", nil)
+	
+	// Invalid Token
+	r.Header.Add("Token", "")
+	HandlerResponseCode(w, r)
+
+	fmt.Println(w.Code)
+	fmt.Println(w.Result().Status)
+	fmt.Println(w.Body.String())
+}
+
+func TestResponseCodeValid(t *testing.T){
+	w := httptest.NewRecorder()
+	r := httptest.NewRequest("GET", "http://localhost:8080/", nil)
+	
+	// Valid Token
+	r.Header.Add("Token", "validToken")
+	HandlerResponseCode(w, r)
+
+	fmt.Println(w.Code)
+	fmt.Println(w.Result().Status)
+	fmt.Println(w.Body.String())
+}
+
