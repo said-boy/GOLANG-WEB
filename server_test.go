@@ -277,3 +277,23 @@ func TestResponseCodeValid(t *testing.T){
 	fmt.Println(w.Body.String())
 }
 
+// Cookie
+func HandlersetCookie(w http.ResponseWriter, r *http.Request){
+	cookie := new(http.Cookie)
+	cookie.Name = "X-Saidboy"
+	cookie.Value = "Said"
+	cookie.Path = "/"
+	http.SetCookie(w, cookie)
+}
+
+func TestCookie(t *testing.T){
+	w := httptest.NewRecorder()
+	r := httptest.NewRequest(http.MethodGet, "http://localhost:8080/", nil)
+	HandlersetCookie(w, r)
+	cookies := w.Result().Cookies()
+	for _, cookie := range cookies {
+		fmt.Println(cookie.Name)
+		fmt.Println(cookie.Value)
+		fmt.Println(cookie.Path)
+	}
+}
