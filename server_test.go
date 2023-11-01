@@ -1,8 +1,10 @@
 package golangweb
 
 import (
+	"embed"
 	"fmt"
 	"io"
+	"io/fs"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -369,6 +371,38 @@ func TestFileServerStripPrefix(t *testing.T) {
 		Handler: mux,
 	}
 	err := server.ListenAndServe()
+	if err != nil {
+		panic(err)
+	}
+}
+
+// mengguanakan embed
+//go:embed assets
+var assets embed.FS
+
+func TestFileServerEmbed(t *testing.T) {
+	// secara otomatis akan masuk kedalam sub folder dari 
+	// yang sudah ditentukan.
+	dir , err := fs.Sub(assets, "assets")
+	if err != nil {
+		panic(err)
+	}
+
+	file := http.FileServer(http.FS(dir))
+
+	mux := http.NewServeMux()
+	// ingat -> /static/
+	// maka static nya akan dihitung sebagai folder dan bukan suatu keharusan.
+	mux.Handle("/static/", http.StripPrefix("/static",file))
+
+	// fungsi ini dapat mengakses semuanya yang ada didalam
+	// folder assets.
+
+	server := http.Server{
+		Addr: "localhost:8080",
+		Handler: mux,
+	}
+	err = server.ListenAndServe()
 	if err != nil {
 		panic(err)
 	}
