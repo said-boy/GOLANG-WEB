@@ -297,3 +297,79 @@ func TestCookie(t *testing.T){
 		fmt.Println(cookie.Path)
 	}
 }
+
+// cookie dari client
+func cookieClient(w http.ResponseWriter, r *http.Request){
+	cookie, err := r.Cookie("x-boy")
+	if err != nil {
+		panic(err)
+	}
+	fmt.Fprint(w, cookie.Name)
+	fmt.Fprint(w, cookie.Value)
+}
+
+func TestCookieClient(t *testing.T){
+	w := httptest.NewRecorder()
+	r := httptest.NewRequest(http.MethodGet, "http://localhost:8080/", nil)
+	
+	// mengirim cookie dari client
+	cookie := &http.Cookie{
+		Name: "x-boy",
+		Value: "hallo boyyy",
+	}
+	r.AddCookie(cookie)
+	
+	// jangan lupa kirimkan ke fungsinya setelah ditambahkan.
+	cookieClient(w, r)
+
+	fmt.Println(w.Body.String())
+
+}
+
+// file server
+// agar bisa mengakses file resource html kita
+func TestFileServer(t *testing.T) {
+	dir := http.Dir("./assets")
+	file := http.FileServer(dir)
+
+	mux := http.NewServeMux()
+	// ingat -> /static/
+	// jika tanpa http.StripPrefix maka harus (wajib) ada folder static
+	// didalam folder assets, jika tidak maka akan 404.
+	mux.Handle("/static/", file)
+
+	// fungsi ini tidak dapat mengakses index.js
+
+	server := http.Server{
+		Addr: "localhost:8080",
+		Handler: mux,
+	}
+	err := server.ListenAndServe()
+	if err != nil {
+		panic(err)
+	}
+}
+
+// jika tidak ingin ada folder static didalam folder assets
+// anda dapat menggunakan http.StripPrefix()
+func TestFileServerStripPrefix(t *testing.T) {
+	dir := http.Dir("./assets")
+	file := http.FileServer(dir)
+
+	mux := http.NewServeMux()
+	// ingat -> /static/
+	// maka static nya akan dihitung sebagai folder dan bukan suatu keharusan.
+	mux.Handle("/static/", http.StripPrefix("/static",file))
+
+	// fungsi ini dapat mengakses semuanya yang ada didalam
+	// folder assets.
+
+	server := http.Server{
+		Addr: "localhost:8080",
+		Handler: mux,
+	}
+	err := server.ListenAndServe()
+	if err != nil {
+		panic(err)
+	}
+}
