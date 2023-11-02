@@ -529,3 +529,32 @@ func TestTemplateData(t *testing.T){
 	}
 	server.ListenAndServe()
 }
+
+// mengirim data ke template
+func TemplateAction(w http.ResponseWriter, r *http.Request){
+	t := template.Must(template.ParseGlob("templates/*.gohtml"))
+	err := t.ExecuteTemplate(w, "templateAction.gohtml", map[string]interface{}{
+		"Title": "Hal Index Ini boy",
+		// Name: "Muhammad Said Alkhudri",
+		
+		// data bersarang
+		"Address": Address{
+			Street: "Jl. H. Usman",
+		},
+		"Hobies": []string{
+			"Makan",
+			"Ngoding",
+		},
+		"Score": 90,
+	})
+	if err != nil {
+		panic(err)
+	}
+}
+
+func TestTemplateAction(t *testing.T){
+	w := httptest.NewRecorder()
+	r := httptest.NewRequest(http.MethodGet, "http://localhost:8080/", nil)
+	TemplateAction(w, r)
+	fmt.Println(w.Body.String())
+}

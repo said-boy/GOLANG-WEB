@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.Title}}</title>
+</head>
+
+<body>
+
+    <!-- template action if -->
+    {{if .Name}}
+    <h1 style="color:red;">Nama : {{.Name}}</h1>
+    {{else}}
+    <h1 style="color:red;">Nama : Nobody</h1>
+    {{end}}
+
+    <!-- mengakses data bersarang -->
+    <h1 style="color:blue;">Alamat : {{.Address.Street}}</h1>
+
+    <!-- mengakses data bersarang dengan with lebih simpel -->
+    {{with .Address}}
+    <h3>Street : {{.Street}}</h3>
+    {{end}}
+
+    <!-- iterasi -->
+    {{range $index, $value := .Hobies}}
+    <h3>{{$index}} - {{$value}}</h3>
+    {{end}}
+
+    <!-- kondisi == != < <= > >= -->
+    <!-- if eq(.Score == 10) -->
+    {{if eq .Score 10}}
+    <h6>Good</h6>
+    {{else}}
+    <h6>Not Good</h6>
+    {{end}}
+
+    {{/* Ini komentar */}}
+    
+</body>
+
+</html>
