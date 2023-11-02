@@ -407,3 +407,47 @@ func TestFileServerEmbed(t *testing.T) {
 		panic(err)
 	}
 }
+
+// mengirim file dari server
+// http.ServeFile
+func fileServer(w http.ResponseWriter, r *http.Request){
+	if r.URL.Query().Get("nama") != "" {
+		http.ServeFile(w, r, "pages/status/ok.html")
+	}else{
+		http.ServeFile(w, r, "pages/status/404.html")
+	}
+}
+
+func TestFileFromServer(t *testing.T){
+	server := http.Server{
+		Addr: "localhost:8080",
+		Handler: http.HandlerFunc(fileServer),
+	}
+	server.ListenAndServe()
+}
+
+// menggunakan embed
+//go:embed pages/status/404.html
+var notFound embed.FS
+
+// jika menggunakan string, pastikan data yang akan
+// diembed sudah pasti berupa string
+//go:embed pages/status/ok.html
+var ok string
+
+func fileServerEmbed(w http.ResponseWriter, r *http.Request){
+	if r.URL.Query().Get("nama") != "" {
+		fmt.Fprint(w, ok)
+	}else{
+		file, _ := notFound.ReadFile("pages/status/404.html")
+		fmt.Fprint(w, string(file))
+	}
+}
+
+func TestFileFromServerEmbed(t *testing.T){
+	server := http.Server{
+		Addr: "localhost:8080",
+		Handler: http.HandlerFunc(fileServerEmbed),
+	}
+	server.ListenAndServe()
+}
