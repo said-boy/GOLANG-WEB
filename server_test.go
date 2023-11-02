@@ -9,6 +9,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"text/template"
 )
 
 // 2. Membuat server
@@ -448,6 +449,83 @@ func TestFileFromServerEmbed(t *testing.T){
 	server := http.Server{
 		Addr: "localhost:8080",
 		Handler: http.HandlerFunc(fileServerEmbed),
+	}
+	server.ListenAndServe()
+}
+
+// ParseFile()
+// memanggil template html (tetapi cuma 1)
+func Template(w http.ResponseWriter, r *http.Request){
+	// ParseFile -> untuk mengambil template dari file .html
+	// harus sepesifik file.
+	t := template.Must(template.ParseFiles("pages/index.gohtml"))
+	err := t.ExecuteTemplate(w, "index.gohtml", "Halo")
+	if err != nil {
+		panic(err)
+	}
+}
+
+func TestTemplate(t *testing.T){
+	w := httptest.NewRecorder()
+	r := httptest.NewRequest(http.MethodGet, "http://localhost:8080/", nil)
+	Template(w, r)
+	fmt.Println(w.Body.String())
+}
+
+// ParseGlob()
+// memanggil file html semuanya dengan tanda *
+func TemplateParseGlob(w http.ResponseWriter, r *http.Request){
+	// ParseGlob -> untuk dapat memanggil semua template.
+	t := template.Must(template.ParseGlob("pages/*.gohtml"))
+	err := t.ExecuteTemplate(w, "index.gohtml", "Halo")
+	if err != nil {
+		panic(err)
+	}
+}
+
+func TestTemplateParseGlob(t *testing.T){
+	w := httptest.NewRecorder()
+	r := httptest.NewRequest(http.MethodGet, "http://localhost:8080/", nil)
+	TemplateParseGlob(w, r)
+	fmt.Println(w.Body.String())
+}
+
+type Address struct {
+	Street string
+}
+
+type Index struct {
+	Title string
+	Name string
+	Address Address
+}
+
+// mengirim data ke template
+func TemplateData(w http.ResponseWriter, r *http.Request){
+	t := template.Must(template.ParseGlob("templates/*.gohtml"))
+	err := t.ExecuteTemplate(w, "index.gohtml", Index{
+		Title: "Hal Index Ini boy",
+		Name: "Muhammad Said Alkhudri",
+		
+		// data bersarang
+		Address: Address{
+			Street: "Jl. H. Usman",
+		},
+	})
+	if err != nil {
+		panic(err)
+	}
+}
+
+func TestTemplateData(t *testing.T){
+	// w := httptest.NewRecorder()
+	// r := httptest.NewRequest(http.MethodGet, "http://localhost:8080/", nil)
+	// TemplateData(w, r)
+	// fmt.Println(w.Body.String())
+
+	server := http.Server{
+		Addr: "localhost:8080",
+		Handler: http.HandlerFunc(TemplateData),
 	}
 	server.ListenAndServe()
 }
