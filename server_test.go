@@ -533,7 +533,7 @@ func TestTemplateData(t *testing.T){
 // mengirim data ke template
 func TemplateAction(w http.ResponseWriter, r *http.Request){
 	t := template.Must(template.ParseGlob("templates/*.gohtml"))
-	err := t.ExecuteTemplate(w, "templateAction.gohtml", map[string]interface{}{
+	err := t.ExecuteTemplate(w, "layout", map[string]interface{}{
 		"Title": "Hal Index Ini boy",
 		// Name: "Muhammad Said Alkhudri",
 		
