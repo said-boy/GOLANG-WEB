@@ -36,7 +36,7 @@ func TestHandler(t *testing.T) {
 	}
 
 	server := http.Server{
-		Addr: "localhost:8080",
+		Addr:    "localhost:8080",
 		Handler: handler,
 	}
 
@@ -73,16 +73,16 @@ func TestServeMux(t *testing.T) {
 	})
 
 	// golang akan memprioritaskan url yang panjang terlebih daluhu.
-	
+
 	// maksudnya jika anda memasukkan url /images/thumbnails/ . kita tahu ada handler /images/
 	// tetapi /images/thumbnails/ akan mencari handler /images/thumbnails/ terlebih dahulu.
 	// jika /images/thumbnails/ ada maka akan digunakan jika tidak ada maka akan menggunakan
-	// handler /images/ 
+	// handler /images/
 
-	// lebih baik buat url se-unique mungkin. 
+	// lebih baik buat url se-unique mungkin.
 
 	server := http.Server{
-		Addr: "localhost:8080",
+		Addr:    "localhost:8080",
 		Handler: mux,
 	}
 
@@ -90,27 +90,27 @@ func TestServeMux(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	
+
 }
 
 // 5. Request
 func TestRequest(t *testing.T) {
 
 	var handler http.HandlerFunc = func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintln(w, r.Method) // "GET"
+		fmt.Fprintln(w, r.Method)     // "GET"
 		fmt.Fprintln(w, r.RequestURI) // "/"
 
 		// cara mengambil parameter dari url.
 		fmt.Fprintln(w, r.URL.Query().Get("nama")) // "/?nama=said" -> "said"
-		fmt.Fprintln(w, r.Response) // <nil>
+		fmt.Fprintln(w, r.Response)                // <nil>
 	}
 
 	server := http.Server{
-		Addr: "localhost:8080",
+		Addr:    "localhost:8080",
 		Handler: handler,
-	} 
+	}
 
-	err := server.ListenAndServe()	
+	err := server.ListenAndServe()
 	if err != nil {
 		panic(err)
 	}
@@ -146,7 +146,7 @@ func multipleParameterHandler(w http.ResponseWriter, r *http.Request) {
 	nama := r.URL.Query().Get("nama")
 	bahasa := r.URL.Query().Get("bahasa")
 
-	// Fprintf -> print format 
+	// Fprintf -> print format
 	// %s -> string
 	fmt.Fprintf(w, "Halo.. %s ", nama)
 	fmt.Fprintf(w, "Kamu sedang belajar bahasa %s yaa..?", bahasa)
@@ -159,7 +159,7 @@ func TestMultipleParameter(t *testing.T) {
 	multipleParameterHandler(w, r)
 
 	fmt.Println(w.Body.String())
-	
+
 }
 
 // 8. multiple values parameter
@@ -172,23 +172,23 @@ func HandlerMultipleValues(w http.ResponseWriter, r *http.Request) {
 
 func TestMultipleValues(t *testing.T) {
 	w := httptest.NewRecorder()
-	
+
 	// 1 parameter multi values dengan cara menggunakan key yang sama tetapi dengan value yang berbeda
 	// dan tetap dipisahkan dengan tanda '&' untuk setiap query
 	r := httptest.NewRequest("GET", "http://localhoat:8080/?name=muhammad&name=said&name=al&name=khudri", nil)
 
-	HandlerMultipleValues(w,r)
+	HandlerMultipleValues(w, r)
 
 	fmt.Println(w.Body.String())
 }
 
-// 9. Header 
-func HandlerHeaderResponse(w http.ResponseWriter, r *http.Request){
+// 9. Header
+func HandlerHeaderResponse(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("content-type", "application/json")
 	fmt.Fprint(w, r.Header.Get("content-type"))
 }
 
-func TestHeader(t *testing.T){
+func TestHeader(t *testing.T) {
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest(http.MethodGet, "http://localhost:8080/", nil)
 
@@ -196,12 +196,12 @@ func TestHeader(t *testing.T){
 	fmt.Println(w.Header().Get("content-type"))
 }
 
-func HandlerHeaderRequest(w http.ResponseWriter, r *http.Request){
+func HandlerHeaderRequest(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, r.Header.Get("x-powered-by"))
 
 }
 
-func TestHeaderRequest(t *testing.T){
+func TestHeaderRequest(t *testing.T) {
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest(http.MethodGet, "http://localhost:8080/", nil)
 	r.Header.Add("x-powered-by", "Muhammad Said Alkhudri")
@@ -209,7 +209,7 @@ func TestHeaderRequest(t *testing.T){
 	fmt.Println(w.Body.String())
 }
 
-func HandlerPostForm(w http.ResponseWriter, r *http.Request){
+func HandlerPostForm(w http.ResponseWriter, r *http.Request) {
 	// saat mengambil request post, golang harus melakukan parsing
 	// sebelum diambil datanya.
 	// err := r.ParseForm()
@@ -221,7 +221,7 @@ func HandlerPostForm(w http.ResponseWriter, r *http.Request){
 
 	// tetapi anda dapat menggunakan postformvalue. ini sebenarnya
 	// sebuah `shortcut` dari kode parsing diatas. sebenarnya
-	// dibelakang layar yang dilakukan sama seperti diatas, yaitu 
+	// dibelakang layar yang dilakukan sama seperti diatas, yaitu
 	// diparsing terlebih dahulu.
 	f_name := r.PostFormValue("first_name")
 	l_name := r.PostFormValue("last_name")
@@ -229,11 +229,11 @@ func HandlerPostForm(w http.ResponseWriter, r *http.Request){
 	fmt.Fprintf(w, "Halo %s %s", f_name, l_name)
 }
 
-func TestPostForm(t *testing.T){
+func TestPostForm(t *testing.T) {
 	formPost := strings.NewReader("first_name=Muhammad Said&last_name=Alkhudri")
 	r := httptest.NewRequest(http.MethodPost, "http://localhost:8080/", formPost)
 	w := httptest.NewRecorder()
-	
+
 	// saat mengirimkan post wajib menambahkan ini pada header requestnya
 	// gunanya adalah untuk memberitahu server bahwa ini adalah data post
 	r.Header.Add("Content-Type", "application/x-www-form-urlencoded")
@@ -242,22 +242,22 @@ func TestPostForm(t *testing.T){
 	fmt.Println(w.Body.String())
 }
 
-func HandlerResponseCode(w http.ResponseWriter, r *http.Request){
+func HandlerResponseCode(w http.ResponseWriter, r *http.Request) {
 	token := r.Header.Get("Token")
 	if token == "" {
 		// WriteHeader digunakan untuk menambahkan status code
 		w.WriteHeader(http.StatusUnauthorized)
-		fmt.Fprintln(w,"Silahkan login terlebih dahulu.")
+		fmt.Fprintln(w, "Silahkan login terlebih dahulu.")
 	} else {
 		// jika tidak ada WriteHeader maka default response nya 200 Ok
-		fmt.Fprintln(w,"Selamat datang.")
+		fmt.Fprintln(w, "Selamat datang.")
 	}
 }
 
-func TestResponseCodeInvalid(t *testing.T){
+func TestResponseCodeInvalid(t *testing.T) {
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest("GET", "http://localhost:8080/", nil)
-	
+
 	// Invalid Token
 	r.Header.Add("Token", "")
 	HandlerResponseCode(w, r)
@@ -267,10 +267,10 @@ func TestResponseCodeInvalid(t *testing.T){
 	fmt.Println(w.Body.String())
 }
 
-func TestResponseCodeValid(t *testing.T){
+func TestResponseCodeValid(t *testing.T) {
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest("GET", "http://localhost:8080/", nil)
-	
+
 	// Valid Token
 	r.Header.Add("Token", "validToken")
 	HandlerResponseCode(w, r)
@@ -281,7 +281,7 @@ func TestResponseCodeValid(t *testing.T){
 }
 
 // Cookie
-func HandlersetCookie(w http.ResponseWriter, r *http.Request){
+func HandlersetCookie(w http.ResponseWriter, r *http.Request) {
 	cookie := new(http.Cookie)
 	cookie.Name = "X-Saidboy"
 	cookie.Value = "Said"
@@ -289,7 +289,7 @@ func HandlersetCookie(w http.ResponseWriter, r *http.Request){
 	http.SetCookie(w, cookie)
 }
 
-func TestCookie(t *testing.T){
+func TestCookie(t *testing.T) {
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest(http.MethodGet, "http://localhost:8080/", nil)
 	HandlersetCookie(w, r)
@@ -302,7 +302,7 @@ func TestCookie(t *testing.T){
 }
 
 // cookie dari client
-func cookieClient(w http.ResponseWriter, r *http.Request){
+func cookieClient(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("x-boy")
 	if err != nil {
 		panic(err)
@@ -311,17 +311,17 @@ func cookieClient(w http.ResponseWriter, r *http.Request){
 	fmt.Fprint(w, cookie.Value)
 }
 
-func TestCookieClient(t *testing.T){
+func TestCookieClient(t *testing.T) {
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest(http.MethodGet, "http://localhost:8080/", nil)
-	
+
 	// mengirim cookie dari client
 	cookie := &http.Cookie{
-		Name: "x-boy",
+		Name:  "x-boy",
 		Value: "hallo boyyy",
 	}
 	r.AddCookie(cookie)
-	
+
 	// jangan lupa kirimkan ke fungsinya setelah ditambahkan.
 	cookieClient(w, r)
 
@@ -344,7 +344,7 @@ func TestFileServer(t *testing.T) {
 	// fungsi ini tidak dapat mengakses index.js
 
 	server := http.Server{
-		Addr: "localhost:8080",
+		Addr:    "localhost:8080",
 		Handler: mux,
 	}
 	err := server.ListenAndServe()
@@ -362,13 +362,13 @@ func TestFileServerStripPrefix(t *testing.T) {
 	mux := http.NewServeMux()
 	// ingat -> /static/
 	// maka static nya akan dihitung sebagai folder dan bukan suatu keharusan.
-	mux.Handle("/static/", http.StripPrefix("/static",file))
+	mux.Handle("/static/", http.StripPrefix("/static", file))
 
 	// fungsi ini dapat mengakses semuanya yang ada didalam
 	// folder assets.
 
 	server := http.Server{
-		Addr: "localhost:8080",
+		Addr:    "localhost:8080",
 		Handler: mux,
 	}
 	err := server.ListenAndServe()
@@ -378,13 +378,14 @@ func TestFileServerStripPrefix(t *testing.T) {
 }
 
 // mengguanakan embed
+//
 //go:embed assets
 var assets embed.FS
 
 func TestFileServerEmbed(t *testing.T) {
-	// secara otomatis akan masuk kedalam sub folder dari 
+	// secara otomatis akan masuk kedalam sub folder dari
 	// yang sudah ditentukan.
-	dir , err := fs.Sub(assets, "assets")
+	dir, err := fs.Sub(assets, "assets")
 	if err != nil {
 		panic(err)
 	}
@@ -394,13 +395,13 @@ func TestFileServerEmbed(t *testing.T) {
 	mux := http.NewServeMux()
 	// ingat -> /static/
 	// maka static nya akan dihitung sebagai folder dan bukan suatu keharusan.
-	mux.Handle("/static/", http.StripPrefix("/static",file))
+	mux.Handle("/static/", http.StripPrefix("/static", file))
 
 	// fungsi ini dapat mengakses semuanya yang ada didalam
 	// folder assets.
 
 	server := http.Server{
-		Addr: "localhost:8080",
+		Addr:    "localhost:8080",
 		Handler: mux,
 	}
 	err = server.ListenAndServe()
@@ -411,43 +412,45 @@ func TestFileServerEmbed(t *testing.T) {
 
 // mengirim file dari server
 // http.ServeFile
-func fileServer(w http.ResponseWriter, r *http.Request){
+func fileServer(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Query().Get("nama") != "" {
 		http.ServeFile(w, r, "pages/status/ok.html")
-	}else{
+	} else {
 		http.ServeFile(w, r, "pages/status/404.html")
 	}
 }
 
-func TestFileFromServer(t *testing.T){
+func TestFileFromServer(t *testing.T) {
 	server := http.Server{
-		Addr: "localhost:8080",
+		Addr:    "localhost:8080",
 		Handler: http.HandlerFunc(fileServer),
 	}
 	server.ListenAndServe()
 }
 
 // menggunakan embed
+//
 //go:embed pages/status/404.html
 var notFound embed.FS
 
 // jika menggunakan string, pastikan data yang akan
 // diembed sudah pasti berupa string
+//
 //go:embed pages/status/ok.html
 var ok string
 
-func fileServerEmbed(w http.ResponseWriter, r *http.Request){
+func fileServerEmbed(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Query().Get("nama") != "" {
 		fmt.Fprint(w, ok)
-	}else{
+	} else {
 		file, _ := notFound.ReadFile("pages/status/404.html")
 		fmt.Fprint(w, string(file))
 	}
 }
 
-func TestFileFromServerEmbed(t *testing.T){
+func TestFileFromServerEmbed(t *testing.T) {
 	server := http.Server{
-		Addr: "localhost:8080",
+		Addr:    "localhost:8080",
 		Handler: http.HandlerFunc(fileServerEmbed),
 	}
 	server.ListenAndServe()
@@ -455,7 +458,7 @@ func TestFileFromServerEmbed(t *testing.T){
 
 // ParseFile()
 // memanggil template html (tetapi cuma 1)
-func Template(w http.ResponseWriter, r *http.Request){
+func Template(w http.ResponseWriter, r *http.Request) {
 	// ParseFile -> untuk mengambil template dari file .html
 	// harus sepesifik file.
 	t := template.Must(template.ParseFiles("pages/index.gohtml"))
@@ -465,7 +468,7 @@ func Template(w http.ResponseWriter, r *http.Request){
 	}
 }
 
-func TestTemplate(t *testing.T){
+func TestTemplate(t *testing.T) {
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest(http.MethodGet, "http://localhost:8080/", nil)
 	Template(w, r)
@@ -474,7 +477,7 @@ func TestTemplate(t *testing.T){
 
 // ParseGlob()
 // memanggil file html semuanya dengan tanda *
-func TemplateParseGlob(w http.ResponseWriter, r *http.Request){
+func TemplateParseGlob(w http.ResponseWriter, r *http.Request) {
 	// ParseGlob -> untuk dapat memanggil semua template.
 	t := template.Must(template.ParseGlob("pages/*.gohtml"))
 	err := t.ExecuteTemplate(w, "index.gohtml", "Halo")
@@ -483,7 +486,7 @@ func TemplateParseGlob(w http.ResponseWriter, r *http.Request){
 	}
 }
 
-func TestTemplateParseGlob(t *testing.T){
+func TestTemplateParseGlob(t *testing.T) {
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest(http.MethodGet, "http://localhost:8080/", nil)
 	TemplateParseGlob(w, r)
@@ -495,18 +498,18 @@ type Address struct {
 }
 
 type Index struct {
-	Title string
-	Name string
+	Title   string
+	Name    string
 	Address Address
 }
 
 // mengirim data ke template
-func TemplateData(w http.ResponseWriter, r *http.Request){
+func TemplateData(w http.ResponseWriter, r *http.Request) {
 	t := template.Must(template.ParseGlob("templates/*.gohtml"))
 	err := t.ExecuteTemplate(w, "index.gohtml", Index{
 		Title: "Hal Index Ini boy",
-		Name: "Muhammad Said Alkhudri",
-		
+		Name:  "Muhammad Said Alkhudri",
+
 		// data bersarang
 		Address: Address{
 			Street: "Jl. H. Usman",
@@ -517,26 +520,26 @@ func TemplateData(w http.ResponseWriter, r *http.Request){
 	}
 }
 
-func TestTemplateData(t *testing.T){
+func TestTemplateData(t *testing.T) {
 	// w := httptest.NewRecorder()
 	// r := httptest.NewRequest(http.MethodGet, "http://localhost:8080/", nil)
 	// TemplateData(w, r)
 	// fmt.Println(w.Body.String())
 
 	server := http.Server{
-		Addr: "localhost:8080",
+		Addr:    "localhost:8080",
 		Handler: http.HandlerFunc(TemplateData),
 	}
 	server.ListenAndServe()
 }
 
 // mengirim data ke template
-func TemplateAction(w http.ResponseWriter, r *http.Request){
+func TemplateAction(w http.ResponseWriter, r *http.Request) {
 	t := template.Must(template.ParseGlob("templates/*.gohtml"))
 	err := t.ExecuteTemplate(w, "layout", map[string]interface{}{
 		"Title": "Hal Index Ini boy",
 		// Name: "Muhammad Said Alkhudri",
-		
+
 		// data bersarang
 		"Address": Address{
 			Street: "Jl. H. Usman",
@@ -552,9 +555,30 @@ func TemplateAction(w http.ResponseWriter, r *http.Request){
 	}
 }
 
-func TestTemplateAction(t *testing.T){
+func TestTemplateAction(t *testing.T) {
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest(http.MethodGet, "http://localhost:8080/", nil)
 	TemplateAction(w, r)
+	fmt.Println(w.Body.String())
+}
+
+// template function
+func TemplateFunction(w http.ResponseWriter, r *http.Request) {
+	t := template.New("function")
+	t.Funcs(template.FuncMap{
+		"upper": func(name string) string {
+			return strings.ToUpper(name)
+		},
+	})
+	k := template.Must(t.ParseFiles("templates/function.html"))
+	k.ExecuteTemplate(w, "function", map[string]interface{}{
+		"Name":"said",
+	})
+}
+
+func TestTemplateFunction(t *testing.T) {
+	w := httptest.NewRecorder()
+	r := httptest.NewRequest(http.MethodGet, "http://localhost:8080", nil)
+	TemplateFunction(w, r)
 	fmt.Println(w.Body.String())
 }
