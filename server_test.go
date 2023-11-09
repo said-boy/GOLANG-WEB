@@ -582,3 +582,48 @@ func TestTemplateFunction(t *testing.T) {
 	TemplateFunction(w, r)
 	fmt.Println(w.Body.String())
 }
+
+// caching template
+// agar tidak membuat terus saat membutuhkan handler
+
+var templateCaching = template.Must(template.ParseFiles("templates/templateCaching.html"))
+
+func TemplateCaching(w http.ResponseWriter, r *http.Request){
+	templateCaching.ExecuteTemplate(w, "templateCaching.html", map[string]interface{}{
+		"Name": "Said", 
+	})
+}
+
+func TestTemplateCaching(t *testing.T){
+	w := httptest.NewRecorder()
+	r := httptest.NewRequest(http.MethodGet, "http://localhost:8080/", nil)
+	TemplateCaching(w, r)
+	fmt.Println(w.Body.String())
+}
+
+
+// pipeline
+// meneruskan return function ke function selanjutnya
+var templatePipeline = template.New("templatePipeline.html")
+
+func TemplatePipeline(w http.ResponseWriter, r *http.Request){
+	templatePipeline.Funcs(template.FuncMap{
+		"upper": func (name string) string {
+			return strings.ToUpper(name)
+		},
+		"count": func (name string) int {
+			return strings.Count(name, "U")
+		},
+	})
+	templatePipeline.ParseFiles("templates/templatePipeline.html")
+	templatePipeline.ExecuteTemplate(w, "templatePipeline.html", map[string]interface{}{
+		"Name": "Muhammad Said Alkhudri", 
+	})
+}
+
+func TestTemplatePipeline(t *testing.T){
+	w := httptest.NewRecorder()
+	r := httptest.NewRequest(http.MethodGet, "http://localhost:8080/", nil)
+	TemplatePipeline(w, r)
+	fmt.Println(w.Body.String())
+}
