@@ -572,7 +572,7 @@ func TemplateFunction(w http.ResponseWriter, r *http.Request) {
 	})
 	k := template.Must(t.ParseFiles("templates/function.html"))
 	k.ExecuteTemplate(w, "function", map[string]interface{}{
-		"Name":"said",
+		"Name": "said",
 	})
 }
 
@@ -588,42 +588,69 @@ func TestTemplateFunction(t *testing.T) {
 
 var templateCaching = template.Must(template.ParseFiles("templates/templateCaching.html"))
 
-func TemplateCaching(w http.ResponseWriter, r *http.Request){
+func TemplateCaching(w http.ResponseWriter, r *http.Request) {
 	templateCaching.ExecuteTemplate(w, "templateCaching.html", map[string]interface{}{
-		"Name": "Said", 
+		"Name": "Said",
 	})
 }
 
-func TestTemplateCaching(t *testing.T){
+func TestTemplateCaching(t *testing.T) {
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest(http.MethodGet, "http://localhost:8080/", nil)
 	TemplateCaching(w, r)
 	fmt.Println(w.Body.String())
 }
 
-
 // pipeline
 // meneruskan return function ke function selanjutnya
 var templatePipeline = template.New("templatePipeline.html")
 
-func TemplatePipeline(w http.ResponseWriter, r *http.Request){
+func TemplatePipeline(w http.ResponseWriter, r *http.Request) {
 	templatePipeline.Funcs(template.FuncMap{
-		"upper": func (name string) string {
+		"upper": func(name string) string {
 			return strings.ToUpper(name)
 		},
-		"count": func (name string) int {
+		"count": func(name string) int {
 			return strings.Count(name, "U")
 		},
 	})
 	templatePipeline.ParseFiles("templates/templatePipeline.html")
 	templatePipeline.ExecuteTemplate(w, "templatePipeline.html", map[string]interface{}{
-		"Name": "Muhammad Said Alkhudri", 
+		"Name": "Muhammad Said Alkhudri",
 	})
 }
 
-func TestTemplatePipeline(t *testing.T){
+func TestTemplatePipeline(t *testing.T) {
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest(http.MethodGet, "http://localhost:8080/", nil)
 	TemplatePipeline(w, r)
 	fmt.Println(w.Body.String())
+}
+
+// redirect
+func redirectFrom(w http.ResponseWriter, r *http.Request) {
+	http.Redirect(w, r, "/redirect-to", http.StatusPermanentRedirect)
+}
+
+func redirectTo(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprint(w, "Halo world")
+}
+
+func TestRedirect(t *testing.T) {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/redirect-from", redirectFrom)
+	mux.HandleFunc("/redirect-to", redirectTo)
+
+	// w := httptest.NewRecorder()
+	// r := httptest.NewRequest(http.MethodGet, "http://localhost:8080/redirect-from", nil)
+	// redirectTo(w, r)
+
+	// fmt.Println(w.Body.String())
+
+	server := http.Server{
+		Addr:    "localhost:8080",
+		Handler: mux,
+	}
+
+	server.ListenAndServe()
 }
