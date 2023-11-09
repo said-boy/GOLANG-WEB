@@ -653,4 +653,18 @@ func TestRedirect(t *testing.T) {
 	}
 
 	server.ListenAndServe()
+
+
+	// penggunaan ServeMux{}
+	// mux := http.ServeMux{}
+
+	// mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	// 	fmt.Fprint(w, "Hello, this is the root page.")
+	// })
+
+	// mux.HandleFunc("/about", func(w http.ResponseWriter, r *http.Request) {
+	// 	fmt.Fprint(w, "This is the about page.")
+	// })
+
+	// http.ListenAndServe(":8080", &mux)
 }
