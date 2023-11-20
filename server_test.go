@@ -7,6 +7,7 @@ import (
 	"io/fs"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"strings"
 	"testing"
 	"text/template"
@@ -654,7 +655,6 @@ func TestRedirect(t *testing.T) {
 
 	server.ListenAndServe()
 
-
 	// penggunaan ServeMux{}
 	// mux := http.ServeMux{}
 
@@ -667,4 +667,39 @@ func TestRedirect(t *testing.T) {
 	// })
 
 	// http.ListenAndServe(":8080", &mux)
+}
+
+func uploadImage(w http.ResponseWriter, r *http.Request) {
+	templateUpload := template.Must(template.ParseFiles("templates/uploadImage.html"))
+	templateUpload.ExecuteTemplate(w, "uploadImage.html", map[string]string{})
+}
+
+func showUploadImage(w http.ResponseWriter, r *http.Request) {
+	name := r.PostFormValue("nama")
+	gambar, header, _ := r.FormFile("gambar")
+
+	dst, _ := os.Create("./uploads/" + header.Filename)
+
+	io.Copy(dst, gambar)
+
+	templateShowUpload := template.Must(template.ParseFiles("templates/showUploadImage.html"))
+	templateShowUpload.ExecuteTemplate(w, "showUploadImage.html", map[string]interface{}{
+		"Name":  name,
+		"Image": "/static/" + header.Filename,
+	})
+
+}
+
+func TestUploadImage(t *testing.T) {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", uploadImage)
+	mux.HandleFunc("/upload", showUploadImage)
+	mux.Handle("/static/", http.StripPrefix("/static", http.FileServer(http.Dir("./uploads"))))
+
+	server := http.Server{
+		Addr:    "localhost:8080",
+		Handler: mux,
+	}
+
+	server.ListenAndServe()
 }
