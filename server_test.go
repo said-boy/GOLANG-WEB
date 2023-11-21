@@ -2,6 +2,7 @@ package golangweb
 
 import (
 	"embed"
+	"errors"
 	"fmt"
 	"io"
 	"io/fs"
@@ -695,6 +696,31 @@ func TestUploadImage(t *testing.T) {
 	mux.HandleFunc("/", uploadImage)
 	mux.HandleFunc("/upload", showUploadImage)
 	mux.Handle("/static/", http.StripPrefix("/static", http.FileServer(http.Dir("./uploads"))))
+
+	server := http.Server{
+		Addr:    "localhost:8080",
+		Handler: mux,
+	}
+
+	server.ListenAndServe()
+}
+
+func downloadImage(w http.ResponseWriter, r *http.Request) {
+	file := r.URL.Query().Get("file")
+
+	if file == "" {
+		fmt.Fprint(w, errors.New("File not found"))
+		return
+	}
+
+	// Agar langsung terdownload tanpa terrender dibrowser.
+	w.Header().Add("Content-Disposition", "attachment; filename=\""+file+"\"")
+	http.ServeFile(w, r, "./uploads/"+file)
+}
+
+func TestDownloadFile(t *testing.T) {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", downloadImage)
 
 	server := http.Server{
 		Addr:    "localhost:8080",
